@@ -1,0 +1,78 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+  <h2 class="h1 display-4">Mon Compte</h2>
+  <p class="lead">Mes informations sur The quizz !</p>
+</div>
+
+
+<div class="profile">
+  <div class="form-group mb-5">
+    <label class="h3">Nom</label>
+    <div class="text-secondary"><%= user.lastname %></div>
+  </div>
+  <div class="form-group mb-5">
+    <label class="h3">Prénom</label>
+    <div class="text-secondary"><%= user.firstname %></div>
+  </div>
+  <div class="form-group mb-5">
+    <label class="h3">Email</label>
+    <div class="text-secondary"><%= user.email %></div>
+  </div>
+  <div class="form-group mb-5">
+    <label class="h3">Role</label>
+    <div class="text-secondary"><%= user.role %></div>
+  </div>
+</div>
+
+<label class="h3">Quizz</label>
+<% if (scores.length === 0) {%>
+
+<h4>Vous n'avez pas encore testé de quiz ! &nbsp; 😔</h4>
+
+<%} else {%>
+
+  <div class="table-responsive">
+
+<table class="table table-hover table-sm align-middle">
+  <thead class="thead-dark">
+    <tr>
+      <th>Quizz</th>
+      <th>Meilleur score</th>
+      <th>Nombre d'essai</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (const score of scores) { %>
+
+    <% if (score.dataValues.score === 10) {%>
+    <tr class="table-success">
+      <%} else {%>
+    <tr>
+      <% } %>
+
+
+      <td><%= score.dataValues.quizz %></td>
+
+      <% if (score.dataValues.score === 10) {%>
+
+      <td><%= score.dataValues.score %>  &nbsp; &nbsp; 🎉 Bravo ! </td>
+
+      <%} else {%>
+
+      <td><%= score.dataValues.score %></td>
+
+      <% } %>
+
+      <td><%= score.dataValues.essai %> &nbsp;  <a class="btn btn-info btn-sm" role="button" href="/quiz/<%=score.dataValues.quizzes[0].dataValues.id %>">Refaire ce quiz !</a> </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+</div>
+
+<% } %>
+
+
+
+<%- include('partials/footer') %>

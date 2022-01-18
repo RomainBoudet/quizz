@@ -5,6 +5,8 @@ const express = require('express');
 const router = require('./app/router');
 const session = require('express-session');
 
+const userMW = require('./app/middlewares/userMW');
+
 const app = express();
 //on utilise la variable d'environnement PORT pour attribuer un port à notre appli express
 //En cas de pépin, on se rabat sur une valeur par défaut
@@ -46,6 +48,8 @@ app.use((req, res, next) => {
   
   app.set('x-powered-by', false);
 
+  //on veut utiliser notre middleware maison pour initialiser user en session à chaque requête
+app.use(userMW);
 
 //on va devoir gérer des données en POST
 //on ajoute le middleware urlencoded pour récupérer les infos dans request.body
