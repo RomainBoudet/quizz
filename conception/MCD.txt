@@ -1,0 +1,21 @@
+
+
+posséde, ON UTILISATEUR, 11 SCORES
+SCORES: quizz, score, essai
+est présent dans, 0N QUIZ, 0N SCORES
+définit, 0N NIVEAU, 11 QUESTION
+NIVEAU : nom
+
+UTILISATEUR : email, prénom, nom, mot de passe
+écrit, 0N UTILISATEUR, 11 QUIZ
+QUIZ : titre
+QUESTION : énoncé, anecdote, explication
+a pour choix, 1N QUESTION, 11 PROPOSITION
+
+TAG : nom
+qualifie, 0N TAG, 0N QUIZ
+appartient, 11 QUESTION, 0N QUIZ
+valide, 01 PROPOSITION, 11 QUESTION
+PROPOSITION : libellé
+
+http://mocodo.wingi.net/ 
