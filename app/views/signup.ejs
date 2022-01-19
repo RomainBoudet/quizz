@@ -33,7 +33,7 @@
         <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp"
             placeholder="Votre courriel">
         <label for="email">Votre courriel</label>
-        <small id="emailHelp" class="form-text text-muted">Nous ne partagerons jamais votre courriel.</small>
+        <small id="emailHelp" class="form-text text-muted">Nous ne partagerons jamais votre courriel. Si vous renseignez un email qui n'est pas le votre, vous ne pourrez pas retrouver votre mot de passe en cas d'oubli. </small>
     </div>
 <%# en cas de MDP trop court / no alphanumerique, on passera une variable errorMdpLength à notre vue %>
     <% if (locals.errorMdpLength) {%>
@@ -57,7 +57,7 @@
     </div>
 
     <div class="form-group text-center">
-        <button type="submit" class="btn btn-primary">Envoyer</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Envoyer</button>
     </div>
 </form>
 

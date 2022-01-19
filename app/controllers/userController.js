@@ -21,14 +21,14 @@ const userController = {
           email
         }
       })
-
+    
       //si aucun user touvé avec cet email => message d'erreur
       if (!user) {
         return response.render('login', {
           error: 'Email ou mot de passe incorrect'
         });
       }
-
+      
 
       //le user avec cet email existe, on vérifie son mot de passe en comparant :
       //- la version en clair saisie dans le formulaire
@@ -88,6 +88,7 @@ const userController = {
 
   handleSignupForm: async (request, response) => {
     try {
+
       //on checke si un utilisateur existe déjà avec cet email
       const user = await User.findOne({
         where: {
