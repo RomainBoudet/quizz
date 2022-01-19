@@ -3,6 +3,8 @@ const router = express.Router();
 
 const mainController = require('./controllers/mainController');
 const userController = require('./controllers/userController');
+const quizController = require('./controllers/quizController');
+
 
 
 
@@ -22,6 +24,9 @@ router.get('/profile', userController.profilePage);
 
 //deconnexion
 router.get('/logout', userController.logout);
+
+//afficher les détails d'un quiz
+router.get('/quiz/:id', quizController.quizzPage);
 
 
 

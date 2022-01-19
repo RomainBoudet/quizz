@@ -3,14 +3,14 @@ const {Quiz} = require('../models');
 
 
 const mainController = {
-    home: async (request, response) => {
+    home: async (_, res) => {
         try {
             //on récupère tous les quizzes en base
             const quizzes = await Quiz.findAll({
                 //on ajoute les infos de l'auteur grâce aux relations qu'on a définies
                 include: 'author'
             })
-            response.render('index', {quizzes});        
+            res.render('index', {quizzes});        
         } catch (error) {
             if (error instanceof Error)
                 throw error;

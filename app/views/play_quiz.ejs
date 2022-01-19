@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="h1 display-4"><%= quiz.title %></h2>
+    <p class="lead"><%= quiz.description %></p>
+    <p class="font-weight-bold">par <%= quiz.author.fullname %></p>
+    <p class="lead"><%= quiz.questions.length %> questions</p>
+</div>
+
+<div class="row">
+
+    <% for (let tag of quiz.tags) { %>
+    <div class="col-3 p-4 text-center">
+        <a class="btn btn-block btn-lg tag tag--<%= tag.name.toLowerCase() %>" href="/tag/<%= tag.id %>">
+            <%= tag.name %>
+        </a>
+    </div>
+    <% } %>
+
+</div>
+
+<div class="row">
+
+    <%# en cas d'erreur, on passera une variable error à notre vue %>
+    <% if (locals.error) {%>
+    <div class="alert alert-danger font-weight-bold text-center"><%= error %></div>
+    <% } %>
+
+
+    <form method="POST" action="/quiz/<%= quiz.id %>">
+
+        <% for(let array of shuffleAnswers) { %>
+
+        <div class="col-12"> 
+            <label
+                class="badge level level--<%= array[0].level.toLowerCase() %>"><%= array[0].level %></label>
+            <h4>
+                <%= array[0].question %>
+            </h4>
+            <ul class="list-unstyled ml-5">
+                <% for(let answer of array){ %>
+
+                <%# on boucle sur chaque réponse possible pour une question %>
+                <%# on place un bouton radio avec un name en commun afin de ne permettre qu'un seul choix à l'utilisateur %>
+                <%# on utilise value pour stocker l'id en BDD de la réponse en cours %>
+                <%# au click sur valider, dans body.request, on obtiendra une valeur par question, de la forme :
+
+                    question_X: id_reponse_selectionnee_par_user
+                
+                et ce pour chaque question %>
+                <label class="btn btn-info active">
+
+                    <li><input type="radio" name="question_<%= answer.question_id %>"
+                            value="<%=answer.id %>">&nbsp; <%= answer.description %>
+                    </li>
+
+                </label>
+                
+                <% } %>
+            </ul>
+        </div>
+
+
+        <% } %>
+
+        <%# en cas d'erreur, on passera une variable error à notre vue %>
+        <% if (locals.error) {%>
+        <div class="error"><%= error %></div>
+        <% } %>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Valider</button>
+    </form>
+
+</div>
+
+<%- include('partials/footer') %>

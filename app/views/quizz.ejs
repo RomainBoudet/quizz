@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h2 class="h1 display-4"><%= quiz.title %></h2>
+            <p class="lead"><%= quiz.description %></p>
+            <p class="font-weight-bold">par <%= quiz.author.fullname %></p>
+            <p class="lead"><%= quiz.questions.length %> questions</p>
+        </div>
+
+        <div class="row">
+            <% for (const tag of quiz.tags) { %>
+            <div class="col-3 p-4 text-center">
+                <a class="btn btn-block btn-lg tag tag--<%= tag.name.toLowerCase() %>" href="/tag/<%= tag.id %>">
+                    <%= tag.name %>
+                </a>
+            </div>
+            <% } %>
+        </div>
+
+       <a href="/login"><p class="alert alert-danger font-weight-bold text-center">Pour jouer a un quiz et connaitre votre score, merci de vous inscrire 😉</p></a> 
+
+
+        <div class="row">
+
+            <% for (const question of quiz.questions) { %>
+            <div class="col-12">
+                <label class="badge level level--<%= question.level.name.toLowerCase() %>"><%= question.level.name %></label>
+                <h4>
+                    <%= question.question %>
+                </h4>
+                <ul>
+                    <% for (let index=0; index<question.answers.length; index++) { %>
+                    <li><%= (index+1) %>. <%= question.answers[index].description %></li>
+                    <% } %>
+                </ul>
+            </div>
+            <% } %>
+        </div>
+
+
+<%- include('partials/footer') %>
