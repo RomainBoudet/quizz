@@ -36,7 +36,6 @@ const tagController = {
                 });
         } catch (error) {
             console.trace(err);
-			res.status(500).send(err);
         }
 
     }
