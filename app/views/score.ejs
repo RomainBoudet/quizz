@@ -1,0 +1,70 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="h1 display-4"><%= quiz.title %></h2>
+    <p class="lead"><%= quiz.description %></p>
+    <p class="font-weight-bold">par <%= quiz.author.fullname %></p>
+    <p class="lead"><%= quiz.questions.length %> questions</p>
+</div>
+
+<div class="row">
+
+    <% for (let tag of quiz.tags) { %>
+    <div class="col-3 p-4 text-center">
+        <a class="btn btn-block btn-lg tag tag--<%= tag.name.toLowerCase() %>" href="/tag/<%= tag.id %>">
+            <%= tag.name %>
+        </a>
+    </div>
+    <% } %>
+
+</div>
+
+<div class="row">
+    <div class="result">Vous avez marqué <%= nbPoints %> points. <span class="good">En vert les bonnes réponses</span>  et <span class="bad" >en rouge vos érreurs</span> : </div>
+    <%# on boucle sur les questions avec for...in pour avoir accès à la position de la question dans le tableau
+    grâce à cette position, on pourra consulter l'élément du tableau answers à la même position %>
+    <% for(let indexQuest in quiz.questions) { %>
+
+        <div class="col-12">
+            <label class="badge level level--<%= quiz.questions[indexQuest].level.name.toLowerCase() %>"><%= quiz.questions[indexQuest].level.name %></label>
+            <h4>
+                <%= quiz.questions[indexQuest].question %>
+            </h4>
+            <ul>
+                <%# on boucle sur les réponses possibles avec for...in ici aussi, 
+                on aura besoin de la position de chaque réponse possible %>
+                <% for(let indexResp in quiz.questions[indexQuest].answers) { %>
+                    <%# EJS nous permet de déclarer des variables qu'on pourra utiliser dans la vue
+                    On va jouer sur la class css pour afficher :
+                    - la bonne réponse en vert (class good)
+                    - la réponse du user en rouge s'il s'est trompé (class bad)
+                    - les autres réponses en noir (class normal)
+                    Ces 3 classes ont été ajoutées dans style.css %>
+                    <% let className = 'normal'; %>
+                    <% const number = parseInt(indexResp, 10)+1; %>
+                    <%# si la réponse possible en cours a le même id que la bonne réponse, on applique la class good %>
+                    <% if (answers[indexQuest].question_answer === quiz.questions[indexQuest].answers[indexResp].id) { %>
+                        <% className = 'good'; %>
+
+                    <%# si la réponse possible en cours a le même id que la réponse du user ET que c'est une mauvaise réponse
+                    on applique la class bad %>
+                    <% } else if (answers[indexQuest].user_answer === quiz.questions[indexQuest].answers[indexResp].id 
+                        && !answers[indexQuest].isGood) { %>
+                        <% className = 'bad'; %>
+                    
+                    <%# sinon, on applique la class normal %>
+                    <% } else { %>
+                        <% className = 'normal'; %>
+                    <% } %>
+                    <%# on applique la class css déterminée ci-dessus à l'élément li afin de colorier le texte dans la bonne couleur %>
+                    <li class="<%= className %>"><%= number%>. <%= quiz.questions[indexQuest].answers[indexResp].description %></li>
+                <% } %>
+            </ul>
+        </div>
+
+
+    <% } %>
+
+</div>
+
+<%- include('partials/footer') %>

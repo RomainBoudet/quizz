@@ -27,7 +27,7 @@ router.get('/logout', userController.logout);
 
 //afficher les détails d'un quiz
 router.get('/quiz/:id', quizController.quizzPage);
-
+router.post('/quiz/:id', quizController.quizzAnswer);
 
 
 //on exporte le routeur pour l'utiliser dans index.js
