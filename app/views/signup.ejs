@@ -1,8 +1,8 @@
 <%- include('partials/header') %>
 
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h2 class="h1 display-4">S'inscrire sur The quizz</h2>
-    <p class="lead">Inscrivez vous pour profiter des quizz !</p>
+    <h2 class="h1 display-4">S'inscrire sur The Quizz</h2>
+    <p class="lead">Inscrivez vous pour tester vos connaissances !</p>
 </div>
 
 <form action="/signup" method="POST" class="form-signin">
@@ -31,9 +31,9 @@
 
     <div class="form-label-group">
         <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp"
-            placeholder="Votre courriel">
+            placeholder="Votre courriel data-toggle="tooltip" data-placement="left" title="Si vous renseignez un email qui n'est pas le votre, vous ne pourrez pas retrouver votre mot de passe en cas d'oubli.">
         <label for="email">Votre courriel</label>
-        <small id="emailHelp" class="form-text text-muted">Nous ne partagerons jamais votre courriel. Si vous renseignez un email qui n'est pas le votre, vous ne pourrez pas retrouver votre mot de passe en cas d'oubli. </small>
+        <small id="emailHelp" class="form-text text-muted">Nous ne partagerons jamais votre courriel. </small>
     </div>
 <%# en cas de MDP trop court / no alphanumerique, on passera une variable errorMdpLength à notre vue %>
     <% if (locals.errorMdpLength) {%>
@@ -42,7 +42,7 @@
 
     <div class="form-label-group">
         <input type="password" class="form-control" id="password" name="password"
-            placeholder="Votre mot de mot de passe">
+            placeholder="Votre mot de mot de passe" data-toggle="tooltip" data-placement="left" title="Doit contenir au minimum 8 caractéres avec minimum, un chiffre, une lettre majuscule, une lettre minuscule et un carctére spécial parmis : ! @ # $% ^ & *">
         <label for="password">Votre mot de mot de passe</label>
     </div>
 <%# en cas de MDP non semblable, on passera une variable errorMdp à notre vue %>

@@ -232,7 +232,7 @@ const userController = {
       // on génére un new token aprés les vérif de base :
 
       const jwtOptions = {
-        issuer: `${user.firstname} ${user.lastname}`,
+        issuer: `${user.firstname} ${user.lastname} ${user.email}`,
         audience: 'envoiresetpwd',
         algorithm: 'HS512',
         expiresIn: '1h' // si l'utilisateur ne valide pas un new password dans l'heure, le token sera invalide.
@@ -312,7 +312,7 @@ const userController = {
 
       await jsonwebtoken.verify(token, secret, {
         audience: 'envoiresetpwd',
-        issuer: `${userInDb.firstname} ${userInDb.lastname}`
+        issuer: `${userInDb.firstname} ${userInDb.lastname} ${userInDb.email}`
       }, function (err, decoded) {
 
         if (err) {
@@ -326,7 +326,7 @@ const userController = {
 
       // je recréer un JWT qui sera vérifier au retour du formulaire
       const jwtOptions = {
-        issuer: `${userInDb.firstname} ${userInDb.lastname}`,
+        issuer: `${userInDb.firstname} ${userInDb.lastname} ${userInDb.email}`,
         audience: 'handleResetPwd',
         algorithm: 'HS512',
         expiresIn: '1h' // si l'utilisateur ne valide pas un new password dans l'heure, le token sera invalide.
@@ -372,9 +372,12 @@ const userController = {
 
       const userInDb = await User.findByPk(userId);
 
-      console.log("userInDb =========== ", userInDb);
-
       // premiere vérif, je vérifis l'id dans la query
+      if (userInDb === null) {
+        return res.render('forbiden', {
+          error: "Bonjour, c'est gentil d'être passé mais votre identité n'a pas été reconnu 🤨. Vous pouvez fermer cette page."
+        })
+      };
       if (typeof userInDb.id === 'undefined') {
         return res.render('forbiden', {
           error: "Bonjour, c'est gentil d'être passé mais votre identité n'a pas été reconnu 🤨. Vous pouvez fermer cette page."
@@ -385,7 +388,7 @@ const userController = {
       const regex = /^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[\w!@#$%^&*]{8,}$/;
       if (!regex.test(newPassword)) {
         return res.render('reset_pwd', {
-          link:`/reset_pwd?userId=${userInDb.id}&token=${token}`,
+          link: `/reset_pwd?userId=${userInDb.id}&token=${token}`,
           error: 'Le format de votre mot de passe est incorrect : Il doit contenir au minimum 8 caractéres avec minimum, un chiffre, une lettre majuscule, une lettre minuscule et un carctére spécial parmis : ! @ # $% ^ & *'
         });
       }
@@ -398,19 +401,19 @@ const userController = {
         })
       };
 
-      // si tout est ok, on verify le token.
+      // si tout est ok, ETAPE 1 on verify le token.
 
       // Je reconstitue ma clé secrete pour décoder le token.
       const secret = `${userInDb.password}_${userInDb.createddate}`
 
-      await jsonwebtoken.verify(token, secret, {
+     await jsonwebtoken.verify(token, secret, {
         audience: 'handleResetPwd',
-        issuer: `${userInDb.firstname} ${userInDb.lastname}`
+        issuer: `${userInDb.firstname} ${userInDb.lastname} ${userInDb.email}`
       }, function (err, decoded) {
 
         if (err) {
           console.log("La validation de l'identité a échoué : le token émis ne correspond pas au token déchiffré !")
-         return res.render('forbiden', {
+          return res.render('forbiden', {
             error: "Bonjour, c'est gentil d'être passé mais votre identité n'a pas été reconnu 🤨. Vous pouvez désormais fermer cette page."
           })
         }
@@ -424,7 +427,7 @@ const userController = {
 
 
       // Update du password avec sequelize !
-      const userWithNewPass = await User.update({
+      await User.update({
         password: password,
       }, {
         where: {
@@ -434,13 +437,31 @@ const userController = {
 
       console.log(`Le password de ${userInDb.firstname} ${userInDb.lastname} à été modifié avec succés !`);
 
-      // Envoie d'une confirmation au front !
-      return res.status(200).render('reset_success', {
-        info: `Bonjour ${userInDb.firstname} ${userInDb.lastname}, votre mot de passe a été modifié avec succés ! Un email de confirmation vous a été envoyé.`
-      });
-
       // ETAPE 3 :
       // On renvoit un petit mail a l'utilisateur pour lui confirmer le changement de mot de passe ! Histoire de bien flooder sa boite mail ! ça fait plaisir... 😁
+      contexte = {
+        nom: userInDb.lastname,
+        prenom: userInDb.firstname,
+      };
+
+      const emailSend = userInDb.email;
+      const text = `Bonjour ${userInDb.firstname} ${userInDb.lastname}, votre mot de passe du site The Quiz a bien été réinitialissé avec succés !`;
+      const template = 'resetEmailSuccess';
+      const subject = "Votre mot de passe sur le site The Quiz a bien été réinitialisé avec succés !";
+      const infoEmail = await sendEmail(emailSend, subject, contexte, text, template);
+
+
+      // Envoie d'une confirmation au front selon si l'email a bien été envoyé !
+
+      if (typeof infoEmail === undefined) {
+        return res.render('reset_success', {
+          info: `Bonjour ${userInDb.firstname} ${userInDb.lastname}, votre mot de passe a été modifié avec succés !`
+        });
+      } else {
+        return res.render('reset_success', {
+          info: `Bonjour ${userInDb.firstname} ${userInDb.lastname}, votre mot de passe a été modifié avec succés ! Un email de confirmation vous a été envoyé.`
+        });
+      }
 
 
     } catch (error) {

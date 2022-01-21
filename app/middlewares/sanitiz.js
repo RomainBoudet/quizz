@@ -77,7 +77,6 @@ const cleanPassword = (req, res, next) => {
             theBody[prop] = validator.blacklist(theBody[prop], ['_']);
         }
 
-        
         next();
 
         //le password doit pouvoir contenir => @#$%^&* 
