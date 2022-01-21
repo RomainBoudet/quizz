@@ -26,12 +26,12 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     cookie: {
-        secure: true, //si true, la navigateur n'envoit que des cookie sur du HTTPS
+        secure: false, //si true, la navigateur n'envoit que des cookie sur du HTTPS
         maxAge: 1000 * 60 * 60 * 24 * 15, // ça fait une heure * 24h * 15 jours
-        httpOnly: true, // Garantit que le cookie n’est envoyé que sur HTTP(S), pas au JavaScript du client, ce qui renforce la protection contre les attaques de type cross-site scripting.
+        httpOnly: false, // Garantit que le cookie n’est envoyé que sur HTTP(S), pas au JavaScript du client, ce qui renforce la protection contre les attaques de type cross-site scripting.
         sameSite: 'Strict', //le mode Strict empêche l’envoi d’un cookie de session dans le cas d’un accès au site via un lien externe//https://blog.dareboost.com/fr/2017/06/securisation-cookies-attribut-samesite/
         //!il faudra définir les options de sécurité pour accroitre la sécurité. (https://expressjs.com/fr/advanced/best-practice-security.html)
-        domain: 'quiz.romainboudet.fr', // Indique le domaine du cookie ; utilisez cette option pour une comparaison avec le domaine du serveur dans lequel l’URL est demandée. S’ils correspondent, vérifiez ensuite l’attribut de chemin.
+        // domain: 'youDomainName', // Indique le domaine du cookie ; utilisez cette option pour une comparaison avec le domaine du serveur dans lequel l’URL est demandée. S’ils correspondent, vérifiez ensuite l’attribut de chemin.
         //path: 'foo/bar', Indique le chemin du cookie ; utilisez cette option pour une comparaison avec le chemin demandé. Si le chemin et le domaine correspondent, envoyez le cookie dans la demande.
         //expires: expiryDate, Utilisez cette option pour définir la date d’expiration des cookies persistants.
     },
