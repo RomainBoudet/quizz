@@ -12,10 +12,8 @@ const mainController = {
             })
             res.render('index', {quizzes});        
         } catch (error) {
-            if (error instanceof Error)
-                throw error;
-            else
-                console.log('Error in mainController', error);
+            console.trace(error)
+            res.status(500).end();
         }
 
     }

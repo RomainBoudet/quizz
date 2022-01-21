@@ -1,0 +1,16 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">Renouveller son mot de passe sur The Quizz</h2>
+</div>
+
+<img src="/img/gandalf.jpg" alt="You will not pass said Gandalf !">
+
+<%# en cas d'erreur, on passera une variable error à notre vue %>
+<% if (locals.error) {%>
+<div class="error"><%= error %></div>
+<% } %>
+
+<!-- https://stackoverflow.com/questions/23160743/how-to-send-flash-messages-in-express-4-0 -->
+
+<%- include('partials/footer') %>

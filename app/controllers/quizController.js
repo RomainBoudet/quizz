@@ -109,6 +109,7 @@ const quizzController = {
 			});
 		} catch (err) {
 			console.trace(err);
+			res.status(500).end();
 		}
 	},
 
@@ -346,7 +347,7 @@ const quizzController = {
 
 		} catch (error) {
 			console.trace(err);
-
+			res.status(500).end();
 		}
 
 

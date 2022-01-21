@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS "user" (
   "password" text NOT NULL,
   "firstname" text NULL,
   "lastname" text NULL,
-  "role" text NOT NULL DEFAULT 'user'
+  "role" text NOT NULL DEFAULT 'user',
+  "createddate" timestamptz NOT NULL DEFAULT now()
 );
 
 

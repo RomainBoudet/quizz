@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">Renouveller son mot de passe sur The Quizz</h2>
+    <p class="lead">Un lien vous sera envoyé sur votre email pour réinitialiser votre mot de passe.</p>
+</div>
+
+<%# en cas d'erreur, on passera une variable error à notre vue %>
+<% if (locals.error) {%>
+<div class="error"><%= error %></div>
+<% } %>
+<%# et si tout va bien, une info %>
+<% if (locals.info) {%>
+    <div class="goodEmail"><%= info %></div>
+    <% } %>
+<div class="row">
+    <div class="col-6 offset-3">
+        <form action="/reset_email" method="POST" class="form-signup">
+
+            <div class="form-label-group">
+                <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp"
+                    placeholder="Votre courriel">
+                <label for="email">Votre courriel</label>
+                <small id="emailHelp" class="form-text text-muted">Nous ne partagerons jamais votre courriel.</small>
+
+            </div>
+
+            
+            <button class="btn btn-lg btn-success btn-block btn-success" type="submit">Valider</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- https://stackoverflow.com/questions/23160743/how-to-send-flash-messages-in-express-4-0 -->
+
+<%- include('partials/footer') %>

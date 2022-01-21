@@ -26,7 +26,8 @@ User.init({
   },
   firstname: Sequelize.STRING,
   lastname: Sequelize.STRING,
-  role: Sequelize.STRING
+  role: Sequelize.STRING,
+  createddate: Sequelize.DATE
 }, {
   sequelize,
   tableName: "user"

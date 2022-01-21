@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">Renouveller son mot de passe sur The Quizz</h2>
+</div>
+
+<%# en cas d'erreur, on passera une variable error à notre vue %>
+<% if (locals.error) {%>
+<div class="error"><%= error %></div>
+<% } %>
+<div class="row">
+    <div class="col-6 offset-3">
+        <form action="<%=link%>" method="POST" class="form-signup">
+
+            <div class="form-label-group">
+                <input type="password" class="form-control" id="newPassword" name="newPassword" aria-describedby="emailHelp"
+                    placeholder="Votre mot de passe">
+                <label for="newPassword">Votre mot de passe</label>
+            </div>
+
+            <div class="form-label-group">
+                <input type="password" class="form-control" id="newPasswordConfirm" name="newPasswordConfirm"
+                    placeholder="La confirmation de votre mot de passe">
+                <label for="newPasswordConfirm">La confirmation de votre mot de passe</label>
+            </div>
+            
+            <button class="btn btn-lg btn-success btn-block" type="submit">Valider</button>
+        </form>
+
+    </div>
+</div>
+
+<%- include('partials/footer') %>

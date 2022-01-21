@@ -11,6 +11,7 @@ const tagController = {
             res.render('tags', {tags});
         } catch (error) {
             console.error(err);
+            res.status(500).end();
         }
     },
 
@@ -36,6 +37,7 @@ const tagController = {
                 });
         } catch (error) {
             console.trace(err);
+            res.status(500).end();
         }
 
     }

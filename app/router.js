@@ -41,6 +41,13 @@ router.get('/tags', tagController.tagsPage);
 //Afficher les quizzes liés à un tag
 router.get('/tag/:id(\\d+)', tagController.quizzesByTag );
 
+//! RÉINITIALISATION DU MOT DE PASSE 
+// afficher le formulaire d'envoi d'un email ETAPE 1
+router.get('/reset_email', userController.resetEmail);// envoie le formulaire de l'email
+router.post('/reset_email',clean, userController.handleEmail); // envoie un email avec un lien
+// Recoit le lien de l'email, vérifie la validité de la demande et enregistre le nouveau mot de passe ETAPE 2
+router.get('/reset_pwd', userController.resetPwd); // page de renvoit du lien qui recoit le token et l'user id en query et valide ainsi l'identité de l'utilisateur
+router.post('/reset_pwd', cleanPassword, userController.handleResetPwd); // traitement du nouveau password, enregistrement en BDD.
 
 //on exporte le routeur pour l'utiliser dans index.js
 module.exports = router;
