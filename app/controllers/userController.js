@@ -246,8 +246,14 @@ const userController = {
       const newToken = await jsonwebtoken.sign(jwtContent, secret, jwtOptions);
       console.log("newToken =>", newToken);
 
+      let link;
+      if (req.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
+        const host = `${process.env.HOSTSERVER}:${process.env.PORT}`;
+        link = `https://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
+      } else {
       const host = req.get('host');
-      const link = `http://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
+       link = `http://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
+      };
 
       contexte = {
         nom: user.lastname,
@@ -405,7 +411,7 @@ const userController = {
       // Je reconstitue ma clé secrete pour décoder le token.
       const secret = `${userInDb.password}_${userInDb.createddate}`
 
-     await jsonwebtoken.verify(token, secret, {
+      await jsonwebtoken.verify(token, secret, {
         audience: 'handleResetPwd',
         issuer: `${userInDb.firstname} ${userInDb.lastname} ${userInDb.email}`
       }, function (err, decoded) {
