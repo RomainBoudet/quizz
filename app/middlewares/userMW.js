@@ -5,7 +5,6 @@ const userMW = (request, response, next) => {
         request.session.user = false;
     }
     response.locals.user = request.session.user;
-    console.log("response.locals.user ====>> ",response.locals.user);
     next();
 };
 

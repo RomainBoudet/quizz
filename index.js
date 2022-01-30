@@ -6,6 +6,13 @@ const router = require('./app/router');
 const session = require('express-session');
 const helmet= require('helmet');
 
+//Config pour session dans REDIS
+const redisSession = require('redis'); //old V3.1.2 ici...
+//connect-redis permet d'utiliser Redis avec express-session pour stocker les cookies de la session sur Redis et non en mémoire (pas bien en prod!)
+let RedisStore = require('connect-redis')(session);
+let redisClient = redisSession.createClient();
+
+
 const userMW = require('./app/middlewares/userMW');
 
 const app = express();
@@ -21,7 +28,11 @@ app.set('views', './app/views');
 app.use(express.static('./integration'));
 
 //mise en place du système de sessions pour stocker les infos utilisateur
-app.use(session({
+const sessionOptions = {
+  store: new RedisStore({
+    client: redisClient,
+    prefix:process.env.PREFIX,
+}), // et nos cookies sont stockés sur REDIS !
     secret: process.env.SECRET,
     resave: true,
     saveUninitialized: true,
@@ -35,13 +46,15 @@ app.use(session({
         //path: 'foo/bar', Indique le chemin du cookie ; utilisez cette option pour une comparaison avec le chemin demandé. Si le chemin et le domaine correspondent, envoyez le cookie dans la demande.
         //expires: expiryDate, Utilisez cette option pour définir la date d’expiration des cookies persistants.
     },
-}));
+};
 
 if (app.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
   app.set('trust proxy', 1) // faire confiance au proxy nginx
   session.cookie.secure = true; // servir des cookies sécurisés 
   session.cookie.domain = process.env.DOMAIN; // par défault, les client devrais envoyer seulement les cookies du current domain, normalement...
 };
+//on lance les sessions aprés config
+app.use(session(sessionOptions));
 
 app.use(helmet());
 

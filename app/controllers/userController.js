@@ -192,7 +192,6 @@ const userController = {
 
   handleEmail: async (req, res) => {
     try {
-      console.log("req.body ligne 189 du userController  ============== ", req.body);
 
       const {
         email
@@ -271,7 +270,7 @@ const userController = {
         });
       } else {
         return res.render('reset_email', {
-          info: "Un email vous a bien été envoyé pour renouveller vote mot de passe."
+          info: "Un email vous a bien été envoyé pour renouveller vote mot de passe. Vous pouvez fermer cette page et cliquer sur le lien envoyé."
         });
       }
 
