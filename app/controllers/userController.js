@@ -11,6 +11,9 @@ const {
 
 const validator = require('validator');
 
+const express = require('express');
+const app = express();
+
 const userController = {
 
   loginForm: (req, res) => {
@@ -245,9 +248,10 @@ const userController = {
 
       const newToken = await jsonwebtoken.sign(jwtContent, secret, jwtOptions);
       console.log("newToken =>", newToken);
+      console.log("app.get('env') ===========>>>> ",app.get('env'));
 
       let link;
-      if (req.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
+      if (app.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
         const host = `${process.env.HOSTSERVER}:${process.env.PORT}`;
         link = `https://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
       } else {
