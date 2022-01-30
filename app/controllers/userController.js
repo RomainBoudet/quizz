@@ -252,7 +252,7 @@ const userController = {
 
       let link;
       if (app.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
-        const host = `${process.env.HOSTSERVER}:${process.env.PORT}`;
+        const host = process.env.DOMAIN;
         link = `https://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
       } else {
       const host = req.get('host');
