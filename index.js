@@ -78,7 +78,7 @@ app.use(helmet.contentSecurityPolicy({
     
       upgradeInsecureRequests: [] 
     }
-  }))
+  }));
 
 // quelques configuration de headers...
 app.use((req, res, next) => {

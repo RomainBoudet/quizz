@@ -54,7 +54,7 @@ router.post('/reset_pwd', cleanPassword, userController.handleResetPwd); // trai
    //FLAG 
    //TODO
 // faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
-router.get('/2fa/generate', userController.generateSecret);
+router.post('/2fa/generate', userController.generateSecret);
 router.post('/2fa/validate', userController.validateSecret);
 
 

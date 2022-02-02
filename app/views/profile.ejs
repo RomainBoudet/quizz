@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 
+
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
   <h2 class="h1 display-4">Mon Compte</h2>
   <p class="lead">Mes informations sur The quizz !</p>
@@ -25,12 +26,37 @@
   </div>
 </div>
 
-<a class="btn btn-info btn-sm" role="button" href="http://localhost:4000/2fa/generate">Activer l'authentification a deux facteurs !</a> <br>
-<% if (locals.error) {%>
-  <div class="bandeau error"><%= error %></div>
-  <% } %>
+
+
+<form action="/2fa/generate" method="POST" class="form-check">
+
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="twofa" id="active2fa" value="true">
+  <label class="form-check-label" for="active2fa">
+    Activer l'authentification a deux facteurs
+  </label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="twofa" id="desactive2fa" value="false">
+  <label class="form-check-label" for="desactive2fa">
+    Désactiver l'authentification a deux facteurs
+  </label>
+</div>
+<button class="btn btn-sm btn-info " type="submit">Valider</button>
+
+</form>
+
+
+<!-- <a class="btn btn-info btn-sm" role="button" href="http://localhost:4000/2fa/generate">Activer l'authentification a deux
+  facteurs !</a>
+ -->
+
 <br>
 
+<% if (locals.error) {%>
+<div class="bandeau error"><%= error %></div>
+<% } %>
+<br>
 
 <label class="h3">Quizz</label>
 <% if (scores.length === 0) {%>
@@ -39,43 +65,44 @@
 
 <%} else {%>
 
-  <div class="table-responsive">
+<div class="table-responsive">
 
-<table class="table table-hover table-sm align-middle">
-  <thead class="thead-dark">
-    <tr>
-      <th>Quizz</th>
-      <th>Meilleur score</th>
-      <th>Nombre d'essai</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% for (const score of scores) { %>
-
-    <% if (score.dataValues.score === 10) {%>
-    <tr class="table-success">
-      <%} else {%>
-    <tr>
-      <% } %>
-
-
-      <td><%= score.dataValues.quizz %></td>
+  <table class="table table-hover table-sm align-middle">
+    <thead class="thead-dark">
+      <tr>
+        <th>Quizz</th>
+        <th>Meilleur score</th>
+        <th>Nombre d'essai</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const score of scores) { %>
 
       <% if (score.dataValues.score === 10) {%>
+      <tr class="table-success">
+        <%} else {%>
+      <tr>
+        <% } %>
 
-      <td><%= score.dataValues.score %>  &nbsp; &nbsp; 🎉 Bravo ! </td>
 
-      <%} else {%>
+        <td><%= score.dataValues.quizz %></td>
 
-      <td><%= score.dataValues.score %></td>
+        <% if (score.dataValues.score === 10) {%>
 
+        <td><%= score.dataValues.score %> &nbsp; &nbsp; 🎉 Bravo ! </td>
+
+        <%} else {%>
+
+        <td><%= score.dataValues.score %></td>
+
+        <% } %>
+
+        <td><%= score.dataValues.essai %> &nbsp; <a class="btn btn-info btn-sm" role="button"
+            href="/quiz/<%=score.dataValues.quizzes[0].dataValues.id %>">Refaire ce quiz !</a> </td>
+      </tr>
       <% } %>
-
-      <td><%= score.dataValues.essai %> &nbsp;  <a class="btn btn-info btn-sm" role="button" href="/quiz/<%=score.dataValues.quizzes[0].dataValues.id %>">Refaire ce quiz !</a> </td>
-    </tr>
-    <% } %>
-  </tbody>
-</table>
+    </tbody>
+  </table>
 </div>
 
 <% } %>

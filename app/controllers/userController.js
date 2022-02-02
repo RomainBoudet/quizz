@@ -508,38 +508,49 @@ const userController = {
 
   generateSecret: async (req, res) => {
     try {
-      //Si l'utilisateur l'a déja activé et veut la supprimer...
-      //J'update a false la valeur de la colonne 2FA 
 
-      //Si l'utilisateur n'a pas déja activé 2FA, et veux l'activer : l'utilisateur doit générer un secret et le vérifier pour activer le 2FA
+        console.log(req.body);
+      // recois une var "2fa" qui vaut soit true si l'utilisateur veut activer 2FA ou false si il veut la désactiver !
+      // on vérifie que req.body est bien un booleén !
+      if (!validator.isBoolean(req.body.twofa)) {
+        const scores = await Score.findAll({
+          where: {
+            user_id: req.session.user.id,
+          },
+          order: ['quizz'],
+          include: {
+            association: 'quizzes'
+          }
+        });
+        return res.render('profile', {
+          error: 'Seules les valeurs "true ou "false" sont valable.',
+          scores,
+          user: req.session.user,
 
-      // Etape 1 : Je dois générer un secret via speakeasy. 
+        });
+      };
+
+      const twofaFromUser = Boolean(req.body.twofa);
 
       //Je récupére les données de mon user qui s'est normalement au préalable identifié...
       const userInDb = await User.findByPk(req.session.user.id);
       //si aucun user touvé  => demande d'authentification
 
-      if (!userInDb) { // ne devrait jamais existrer car la page profile nécéssite déja d'être connecté !
+      if (!userInDb) { // ne devrait jamais exister car la page profile nécéssite déja d'être connecté !
 
-        const scores = await Score.findAll({
-          where: {
-            user_id: req.session.user.id,
-          },
-          order: ['quizz'],
-          include: {
-            association: 'quizzes'
-          }
-        });
-        return res.render('profile', {
+        return res.render('login', {
           error: 'Merci de vous connecter pour activer l\'authentification a deux facteurs !',
-          scores,
-          user: req.session.user,
-
         });
       }
 
-      //je vérifie si dans la table user, la colonne 2FA est a false, si non, je renvoie une vue indiquant que la 2FA est déja active !   
-      if (userInDb.twofa === true) {
+      // si "2fa" vaut false =
+      // on vérifit l'état dans la db et si true on la passe a false, et on renvoie une vue au user !
+
+      if (twofaFromUser === false) {
+
+        console.log("ligne 551, twofaFromUser === false ")
+
+
         const scores = await Score.findAll({
           where: {
             user_id: req.session.user.id,
@@ -549,59 +560,121 @@ const userController = {
             association: 'quizzes'
           }
         });
-        return res.render('profile', {
-          error: 'Votre authentification est déja active !',
-          scores,
-          user: req.session.user,
-        });
-      }
 
-      //génération d'un secret via la méthode generateSecret de speakeasy
-      // secret non partagé, que je garde en bdd
-       const mysecret = await speakeasy.generateSecret({
-        name: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
-        length:200, //par défault 32
-      }); 
-      //console.log('mysecret ====>> ', mysecret);
+        //Si l'utilisateur l'a déja activé et veut la supprimer...
+        if (userInDb.twofa === false) {
 
-      // Création d'un lien que l'on passera a notre qrcode
-      //par défault on a du SHA1 => aucune robustesse... => on passe en SHA512 ! Mais pas certain qu'il soit bien pris en compte... 
-      const secret = await speakeasy.otpauthURL({ secret: mysecret.base32, label: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME, algorithm: 'sha512', encoding:'base32' });
-
-      req.session.user.two_factor_secret = mysecret.base32;
-      console.log("req.session.user.two_factor_secret ==>>> ", req.session.user.two_factor_secret);
-
-      let theQrcode;
-      try {
-
-        theQrcode = await toDataURL(secret, {errorCorrectionLevel: 'H' },);
-
-        // un apercu du qrcode en console.
-        /*  console.log("Rhoo le beau Qrcode ==>> ", await toString(secret, {
-          type: 'terminal',
-        }, {
-          errorCorrectionLevel: 'H'
-        }));  */
-
-      } catch (err) {
-        console.error("Erreur lors de la création du QrCode ! ==>> ", err);
-        return res.status(500).end();
-      }
+          console.log("ligne 568, twofaFromUser === false userInDb.twofa === false ")
 
 
-      //je renvoie ma vue avec mon nouveau qrcode intégrée via le chemin de l'image !
-       return res.status(200).render("qrcode", {
-        theQrcode
-      });
+          return res.render('profile', {
+            error: 'Votre authentification à deux facteurs est déja désactivée.',
+            scores,
+            user: req.session.user,
+          });
+        } else if (userInDb.twofa === true) {
+
+          console.log("ligne 578, twofaFromUser === false userInDb.twofa === true ")
+
+
+          //J'update a false la valeur de la colonne 2FA 
+          await User.update({
+            twofa: false,
+          }, {
+            where: {
+              id: req.session.user.id,
+            }
+          });
+
+          return res.render('profile', {
+            error: 'Votre authentification à deux facteurs a bien été désactivée.',
+            scores,
+            user: req.session.user,
+          });
+        }
+
+      } else if (twofaFromUser === true) {
+
+        console.log("ligne 593, twofaFromUser === true ")
+
+
+        if (userInDb.twofa === true) {
+
+          console.log("ligne 593, twofaFromUser === true userInDb.twofa === true ")
+
+
+          const scores = await Score.findAll({
+            where: {
+              user_id: req.session.user.id,
+            },
+            order: ['quizz'],
+            include: {
+              association: 'quizzes'
+            }
+          });
+
+          return res.render('profile', {
+            error: 'Votre authentification à deux facteurs a déja été activée !',
+            scores,
+            user: req.session.user,
+          });
+        } else if (userInDb.twofa === false) {
+
+          console.log("ligne 593, twofaFromUser === true userInDb.twofa === false ")
+
+
+          //génération d'un secret via la méthode generateSecret de speakeasy
+          // secret non partagé, que je garde en bdd
+          const mysecret = await speakeasy.generateSecret({
+            name: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
+            length: 200, //par défault 32
+          });
+          //console.log('mysecret ====>> ', mysecret);
+
+          // Création d'un lien que l'on passera a notre qrcode
+          //par défault on a du SHA1 => aucune robustesse... => on passe en SHA512 ! Mais pas certain qu'il soit bien pris en compte... 
+          const secret = await speakeasy.otpauthURL({
+            secret: mysecret.base32,
+            label: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
+            algorithm: 'sha512',
+            encoding: 'base32'
+          });
+
+          req.session.user.two_factor_secret = mysecret.base32;
+          console.log("req.session.user.two_factor_secret ==>>> ", req.session.user.two_factor_secret);
+
+          let theQrcode;
+          try {
+
+            theQrcode = await toDataURL(secret, {
+              errorCorrectionLevel: 'H'
+            }, );
+
+            // un apercu du qrcode en console.
+            /*  console.log("Rhoo le beau Qrcode ==>> ", await toString(secret, {
+              type: 'terminal',
+            }, {
+              errorCorrectionLevel: 'H'
+            }));  */
+
+          } catch (err) {
+            console.error("Erreur lors de la création du QrCode ! ==>> ", err);
+            return res.status(500).end();
+          }
+
+          //je renvoie ma vue avec mon nouveau qrcode intégrée via le chemin de l'image !
+          return res.status(200).render("qrcode", {
+            theQrcode
+          });
+
+        }
+
+      };
 
     } catch (error) {
       console.log("Erreur dans la méthode generateSecret dans le userController ==>> ", error);
       return res.status(500).end();
     }
-
-
-
-
   },
 
   validateSecret: async (req, res) => {
@@ -609,7 +682,7 @@ const userController = {
 
       // je vérifit qu'il s'agit bien d'un nombre a 6 chiffres !
       console.log("req.body ===>> ", req.body);
-      if (!validator.isNumeric(req.body.code) || req.body.code.length !== 6 ) {
+      if (!validator.isNumeric(req.body.code) || req.body.code.length !== 6) {
 
         return res.render('qrcode', {
           error: 'Le format du code est incorrect !',
@@ -626,15 +699,33 @@ const userController = {
         encoding: 'base32',
         token,
         //algorithm:'sha512'
-        
-      }); 
+
+      });
       console.log("isTokenValide ====>>> ", isTokenValide);
 
       //FLAG 
       //! que fait on quand le token est valide ! 
 
       // passer a true la valeur en bdd pour twofa, 
-      // socker le secret
+      await User.update({
+        twofa: true,
+      }, {
+        where: {
+          id: req.session.user.id,
+        }
+      });
+
+      // socker le secret du user
+      await User.update({
+        secret: req.session.user.two_factor_secret,
+      }, {
+        where: {
+          id: req.session.user.id,
+        }
+      });
+
+      //Renvoyer une vue indiquant que tout c'est bien passé !
+
       // etc..
       // faire une feature pour choisir via email ou app d'authentification ?
 
