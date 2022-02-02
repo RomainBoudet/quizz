@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">Activer l'authentification à deux facteurs sur The Quizz</h2>
+    <p class="lead">Merci de scanner ce qrcode avec votre application 2FA favoris (Authy, Google Authenticator...etc)</p>
+</div>
+
+
+<div class="row">
+    <div class="col-6 offset-3">
+
+        <%# Si tout va bien, on passera une variable theQrCode à notre vue %>
+        <% if (theQrcode) {%>         
+       <img src="<%= theQrcode %>" alt="Qrcode pour l'authentification à deux facteurs" class="qrcode"
+       crossorigin="anonymous">
+        <% } %>
+
+        <%# en cas d'erreur, on passera une variable error à notre vue %>
+        <% if (locals.error) {%>
+            <div class="bad"><%= error %></div>
+            <% } %>
+        <form action="/2fa/validate" method="POST" class="form-signup">
+
+            <div class="form-label-group">
+                <input type="number" class="form-control" id="code" name="code" aria-describedby="TOTP code from your Authenticator app"
+                    placeholder="Votre code">
+                <label for="email">Votre code</label>
+                <small id="emailHelp" class="form-text text-muted">Votre code en provenance de votre 2FA application reçu aprés le scan du qrcode</small>
+
+            </div>
+
+            
+            <button class="btn btn-lg btn-success btn-block btn-success" type="submit">Valider</button>
+        </form>
+
+    </div>
+</div>
+
+<%- include('partials/footer') %>

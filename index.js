@@ -11,6 +11,7 @@ const redisSession = require('redis'); //old V3.1.2 ici...
 //connect-redis permet d'utiliser Redis avec express-session pour stocker les cookies de la session sur Redis et non en mémoire (pas bien en prod!)
 let RedisStore = require('connect-redis')(session);
 let redisClient = redisSession.createClient();
+const crypto = require('crypto');
 
 
 const userMW = require('./app/middlewares/userMW');
@@ -57,12 +58,19 @@ app.use(session(sessionOptions));
 
 app.use(helmet());
 
+
+// Config for sub-resources integrity 
+app.use((_, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString("hex");
+  next();
+});
+
 // CSP configuration and headers security
 app.use(helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: [`'self'`,], 
-      "script-src": ["'none'"],
-      "img-src": [`'self'`, "https://filedn.eu/lD5jpSv048KLfgLMlwC2cLz/RB.png"],
+      "script-src": [(_, res) => `'nonce-${res.locals.nonce}'`],
+      "img-src": [`'self'`, "https://filedn.eu/lD5jpSv048KLfgLMlwC2cLz/RB.png", "data:" ], // nonce ne fonctionne pas avec les img car pas d'attribut nonce 
       
       "style-src": [ `'self'`,"'unsafe-inline'", "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"], //
       "base-uri": ["'none'"],

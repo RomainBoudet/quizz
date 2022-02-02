@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS "user" (
   "firstname" text NULL,
   "lastname" text NULL,
   "role" text NOT NULL DEFAULT 'user',
+  "twofa" boolean NOT NULL DEFAULT false,
   "createddate" timestamptz NOT NULL DEFAULT now()
 );
 

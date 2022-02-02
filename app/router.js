@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const app = express();
+const path = require('path');
 
 const mainController = require('./controllers/mainController');
 const userController = require('./controllers/userController');
@@ -12,7 +14,6 @@ const {
   } = require('./middlewares/sanitiz'); //cleanPassword => moins restrictif, pour laisser passer les caractéres spéciaux des password. 
   // clean => pour toutes les routes sans password (ou on n'a pas besoin de caractéres spéciaux..)
   
-
 
 router.get('/', mainController.home);
 
@@ -48,6 +49,14 @@ router.post('/reset_email',clean, userController.handleEmail); // envoie un emai
 // Recoit le lien de l'email, vérifie la validité de la demande et enregistre le nouveau mot de passe ETAPE 2
 router.get('/reset_pwd', userController.resetPwd); // page de renvoit du lien qui recoit le token et l'user id en query et valide ainsi l'identité de l'utilisateur
 router.post('/reset_pwd', cleanPassword, userController.handleResetPwd); // traitement du nouveau password, enregistrement en BDD.
+
+//! Mise en place d'une authentification a deux facteur via TOTP
+   //FLAG 
+   //TODO
+// faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
+router.get('/2fa/generate', userController.generateSecret);
+router.post('/2fa/validate', userController.validateSecret);
+
 
 //on exporte le routeur pour l'utiliser dans index.js
 module.exports = router;

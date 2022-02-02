@@ -10,6 +10,25 @@ const {
 } = require('../service/sendMail');
 
 const validator = require('validator');
+const speakeasy = require('speakeasy');
+const {
+  toDataURL,
+  toString,
+  toFileStream
+} = require('qrcode');
+
+const {
+  PassThrough
+} = require('stream');
+
+const fs = require('fs');
+const express = require('express');
+const app = express();
+//var serveStatic = require('serve-static');
+var path = require('path');
+
+
+
 
 const userController = {
 
@@ -48,6 +67,12 @@ const userController = {
           error: 'Email ou mot de passe incorrect'
         });
       }
+
+      //FLAG 
+      //TODO
+      // on vérifit dans la table user si la colonne 2FA est a true, si oui, on envoie la vue de demande du code 2FA. Si non, on laisse passe !
+
+      // On renvoit cette vue sur la méthode de vérification du secret ! 
 
 
       //le user existe et s'est correctement identifié, on stocke les infos qui vont bien dans la session
@@ -251,8 +276,8 @@ const userController = {
         const host = process.env.DOMAIN;
         link = `https://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
       } else {
-      const host = req.get('host');
-       link = `http://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
+        const host = req.get('host');
+        link = `http://${host}/reset_pwd?userId=${user.id}&token=${newToken}`;
       };
 
       contexte = {
@@ -361,7 +386,7 @@ const userController = {
   },
 
 
-  handleResetPwd: async (req, res, err) => {
+  handleResetPwd: async (req, res) => {
     try {
       const {
         userId,
@@ -473,6 +498,154 @@ const userController = {
       console.trace(
         'Erreur dans la méthode reset_pwd du userController :',
         error);
+      res.status(500).end();
+    }
+
+  },
+
+  //! 2FA => three-step process: 1)Generate a secret // 2)Show a QR code for the user to scan in // 3)Authenticate the token for the first time
+  // Finir ligne 55
+
+  generateSecret: async (req, res) => {
+    try {
+      //Si l'utilisateur l'a déja activé et veut la supprimer...
+      //J'update a false la valeur de la colonne 2FA 
+
+      //Si l'utilisateur n'a pas déja activé 2FA, et veux l'activer : l'utilisateur doit générer un secret et le vérifier pour activer le 2FA
+
+      // Etape 1 : Je dois générer un secret via speakeasy. 
+
+      //Je récupére les données de mon user qui s'est normalement au préalable identifié...
+      const userInDb = await User.findByPk(req.session.user.id);
+      //si aucun user touvé  => demande d'authentification
+
+      if (!userInDb) { // ne devrait jamais existrer car la page profile nécéssite déja d'être connecté !
+
+        const scores = await Score.findAll({
+          where: {
+            user_id: req.session.user.id,
+          },
+          order: ['quizz'],
+          include: {
+            association: 'quizzes'
+          }
+        });
+        return res.render('profile', {
+          error: 'Merci de vous connecter pour activer l\'authentification a deux facteurs !',
+          scores,
+          user: req.session.user,
+
+        });
+      }
+
+      //je vérifie si dans la table user, la colonne 2FA est a false, si non, je renvoie une vue indiquant que la 2FA est déja active !   
+      if (userInDb.twofa === true) {
+        const scores = await Score.findAll({
+          where: {
+            user_id: req.session.user.id,
+          },
+          order: ['quizz'],
+          include: {
+            association: 'quizzes'
+          }
+        });
+        return res.render('profile', {
+          error: 'Votre authentification est déja active !',
+          scores,
+          user: req.session.user,
+        });
+      }
+
+      //génération d'un secret via la méthode generateSecret de speakeasy
+      // secret non partagé, que je garde en bdd
+       const mysecret = await speakeasy.generateSecret({
+        name: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
+        length:200, //par défault 32
+      }); 
+      //console.log('mysecret ====>> ', mysecret);
+
+      // Création d'un lien que l'on passera a notre qrcode
+      //par défault on a du SHA1 => aucune robustesse... => on passe en SHA512 ! Mais pas certain qu'il soit bien pris en compte... 
+      const secret = await speakeasy.otpauthURL({ secret: mysecret.base32, label: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME, algorithm: 'sha512', encoding:'base32' });
+
+      req.session.user.two_factor_secret = mysecret.base32;
+      console.log("req.session.user.two_factor_secret ==>>> ", req.session.user.two_factor_secret);
+
+      let theQrcode;
+      try {
+
+        theQrcode = await toDataURL(secret, {errorCorrectionLevel: 'H' },);
+
+        // un apercu du qrcode en console.
+        /*  console.log("Rhoo le beau Qrcode ==>> ", await toString(secret, {
+          type: 'terminal',
+        }, {
+          errorCorrectionLevel: 'H'
+        }));  */
+
+      } catch (err) {
+        console.error("Erreur lors de la création du QrCode ! ==>> ", err);
+        return res.status(500).end();
+      }
+
+
+      //je renvoie ma vue avec mon nouveau qrcode intégrée via le chemin de l'image !
+       return res.status(200).render("qrcode", {
+        theQrcode
+      });
+
+    } catch (error) {
+      console.log("Erreur dans la méthode generateSecret dans le userController ==>> ", error);
+      return res.status(500).end();
+    }
+
+
+
+
+  },
+
+  validateSecret: async (req, res) => {
+    try {
+
+      // je vérifit qu'il s'agit bien d'un nombre a 6 chiffres !
+      console.log("req.body ===>> ", req.body);
+      if (!validator.isNumeric(req.body.code) || req.body.code.length !== 6 ) {
+
+        return res.render('qrcode', {
+          error: 'Le format du code est incorrect !',
+          theQrcode: undefined
+        });
+      }
+      const token = req.body.code;
+      console.log('req.session.user ===>>> ', req.session.user);
+      console.log('token ===>>> ', token);
+      console.log("req.session.user.two_factor_secret ===>> ", req.session.user.two_factor_secret);
+
+      const isTokenValide = speakeasy.totp.verify({
+        secret: req.session.user.two_factor_secret,
+        encoding: 'base32',
+        token,
+        //algorithm:'sha512'
+        
+      }); 
+      console.log("isTokenValide ====>>> ", isTokenValide);
+
+      //FLAG 
+      //! que fait on quand le token est valide ! 
+
+      // passer a true la valeur en bdd pour twofa, 
+      // socker le secret
+      // etc..
+      // faire une feature pour choisir via email ou app d'authentification ?
+
+      //https://levelup.gitconnected.com/3-easy-steps-to-implement-two-factor-authentication-in-node-js-559905530392
+      //https://github.com/speakeasyjs/speakeasy/issues/95
+      //https://www.npmjs.com/package/speakeasy#generateSecret 
+
+
+
+    } catch (error) {
+      console.log("Erreur dans la méthode validate du userController : ", error);
       res.status(500).end();
     }
 

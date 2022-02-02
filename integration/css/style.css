@@ -131,3 +131,27 @@
 #header {
   background-color: rgb(73, 43, 43) !important;
 }
+
+.qrcode {
+  display: block;
+    margin-left: auto;
+    margin-right: auto
+}
+
+
+.bandeau.error {
+  color: red;
+  font-size: 2rem;
+  animation: blinker 3s linear infinite;
+
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hide {
+  display: none;
+}
