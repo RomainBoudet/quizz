@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h3>Ce compte est sécurisé par une authentification a deux facteurs.</h3>
+    <h4>Merci de renseigner le code de vérification en provenance de votre application d'authentification.</h4>
+</div>
+
+
+<div class="row">
+    <div class="col-6 offset-3">
+
+        <%# en cas d'erreur, on passera une variable error à notre vue %>
+        <% if (locals.error) {%>
+        <div class="bad"><%= error %></div>
+        <% } %>
+
+
+        <form action="/2fa/validateAfterLogin" method="POST" class="form-signup">
+
+            <div class="form-label-group">
+                <input type="number" class="form-control" id="code" name="code"
+                    aria-describedby="TOTP code from your Authenticator app" placeholder="Votre code">
+                <label for="email">Votre code</label>
+                <small id="emailHelp" class="form-text text-muted">Votre code en provenance de votre 2FA application
+                </small>
+
+            </div>
+
+
+            <button class="btn btn-lg btn-success btn-block btn-success" type="submit">Valider</button>
+        </form>
+
+        <% if (link) {%>
+            <form method="post" action="/profile" class=" form-signup inline">
+                <input type="hidden" name="twofa" value="true">
+                <button type="submit" class="link-button" data-toggle="tooltip" data-placement="left" title="N'oubliez pas de supprimer le compte 'The Quiz' de votre application d'authentification si vous aviez déja scanné le qrcode précédent">
+                    Scanner un nouveau qrcode ?
+                </button>
+            </form>
+            <% } %>
+
+    </div>
+</div>
+
+<%- include('partials/footer') %>

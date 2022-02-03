@@ -28,6 +28,7 @@ User.init({
   lastname: Sequelize.STRING,
   role: Sequelize.STRING,
   twofa: Sequelize.BOOLEAN,
+  secret: Sequelize.STRING,
   createddate: Sequelize.DATE
 }, {
   sequelize,

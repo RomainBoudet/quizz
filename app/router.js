@@ -54,8 +54,10 @@ router.post('/reset_pwd', cleanPassword, userController.handleResetPwd); // trai
    //FLAG 
    //TODO
 // faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
-router.post('/2fa/generate', userController.generateSecret);
+router.post('/profile', userController.generateSecret);
 router.post('/2fa/validate', userController.validateSecret);
+router.post('/2fa/validateAfterLogin', userController.validateSecretAfterLogin);
+
 
 
 //on exporte le routeur pour l'utiliser dans index.js

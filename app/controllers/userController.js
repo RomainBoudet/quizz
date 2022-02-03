@@ -1,6 +1,5 @@
 const {
   User,
-  Score
 } = require('../models');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
@@ -9,31 +8,22 @@ const {
   sendEmail
 } = require('../service/sendMail');
 
+const {
+  makeQrCode
+} = require('../service/qrcode');
+const {
+  scores
+} = require('../service/scores');
+
 const validator = require('validator');
 const speakeasy = require('speakeasy');
-const {
-  toDataURL,
-  toString,
-  toFileStream
-} = require('qrcode');
-
-const {
-  PassThrough
-} = require('stream');
-
-const fs = require('fs');
-const express = require('express');
-const app = express();
-//var serveStatic = require('serve-static');
-var path = require('path');
-
 
 
 
 const userController = {
 
   loginForm: (req, res) => {
-    res.render('login');
+    return res.render('login');
   },
 
 
@@ -59,30 +49,13 @@ const userController = {
       //- la version en clair saisie dans le formulaire
       //- la version hachée stockée en BDD
       //bcrypt est capable de déterminer si les 2 version du mot de passe correcpondent
-      const validPwd = bcrypt.compareSync(req.body.password, user.password);
+      const validPwd = await bcrypt.compare(req.body.password, user.password);
 
       if (!validPwd) {
         //la vérification a échoué, on envoie un message d'erreur
         return res.render('login', {
           error: 'Email ou mot de passe incorrect'
         });
-      }
-
-      //FLAG 
-      //TODO
-      // on vérifit dans la table user si la colonne 2FA est a true, si oui, on envoie la vue de demande du code 2FA. Si non, on laisse passe !
-
-      // On renvoit cette vue sur la méthode de vérification du secret ! 
-
-
-      //le user existe et s'est correctement identifié, on stocke les infos qui vont bien dans la session
-
-      req.session.user = {
-        id: user.id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        role: user.role
       };
 
       if (req.body.remember) {
@@ -91,12 +64,47 @@ const userController = {
         //il peut ainsi quitter son navigateur et revenir sur la page, il devrait rester connecté
         //on indique en date d'expiration la date courante + une heure (en millisecondes)
         req.session.cookie.expires = new Date(Date.now() + 3600000);
-      }
+      };
 
-      res.redirect('/');
+
+
+      // Si le compte nécéssite une authentification a deux facteurs :
+      if (validPwd && user.twofa === true) {
+
+        // J'insère en session une info pour retrouver mon utilisateur aprés sa double authentification.
+
+        req.session.theid = user.id;
+
+        // on envoie la view pour saissir le code de l'app d'authentification
+        return res.status(200).render('login_step2', {
+          link: undefined
+        });
+
+      };
+
+      // J'insére en session les infos nécéssaires
+      let twofaSession;
+      if (user.twofa === true) {
+        twofaSession = "Activée";
+      } else if (user.twofa === false) {
+        twofaSession = "Désactivée";
+      };
+      req.session.user = {
+        id: user.id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        role: user.role,
+        statutTwoFA: twofaSession,
+      };
+
+
+      // si pas de2FA nécéssaire, on renvoie le menu principal
+      return res.status(200).redirect('/');
+
     } catch (error) {
-      res.status(500).end();
       console.log(error);
+      return res.status(500).end();
     }
 
   },
@@ -105,13 +113,13 @@ const userController = {
     //on reset des infos du user en session
     req.session.user = false;
     //on redirige sur la page d'accueil
-    res.redirect('/');
+    return res.redirect('/');
   },
 
   //on envoie le formulaire d'inscription ejs en get a la bonne route définie dans le router
   signupForm: (req, res) => {
 
-    res.render('signup')
+    return res.render('signup')
 
   },
 
@@ -172,8 +180,8 @@ const userController = {
       });
       res.redirect('/login');
     } catch (error) {
-      res.status(500).end();
       console.trace(error);
+      return res.status(500).end();
     }
   },
 
@@ -182,36 +190,23 @@ const userController = {
     try {
       if (!req.session.user) {
         return res.redirect('/login');
-      }
-
-      // On récupére les données de chaque utilisateur et nottament les éssai et quizz répondu avec leur SCORE.
-      // On boucle dessus, et on les affiche !
-      const scores = await Score.findAll({
-        where: {
-          user_id: req.session.user.id,
-        },
-        order: ['quizz'],
-        include: {
-          association: 'quizzes'
-        }
-      });
-
+      };
 
       //https://sequelize.org/master/manual/model-querying-basics.html
 
       res.render('profile', {
         user: req.session.user,
-        scores
+        scores: await scores(req, res),
       });
     } catch (error) {
-      res.status(500).end();
       console.trace(err);
+      return res.status(500).end();
     }
 
   },
 
   resetEmail: (req, res) => {
-    res.render('reset_email');
+    return res.render('reset_email');
   },
 
 
@@ -307,8 +302,8 @@ const userController = {
 
 
     } catch (error) {
-      res.status(500).end();
       console.trace(error);
+      return res.status(500).end();
 
     }
 
@@ -379,7 +374,7 @@ const userController = {
 
     } catch (error) {
       console.trace("Erreur dans la methode resetPwd du userController === ", error);
-      res.status(500).end();
+      return res.status(500).end();
     }
 
 
@@ -498,39 +493,28 @@ const userController = {
       console.trace(
         'Erreur dans la méthode reset_pwd du userController :',
         error);
-      res.status(500).end();
+      return res.status(500).end();
     }
 
   },
 
-  //! 2FA => three-step process: 1)Generate a secret // 2)Show a QR code for the user to scan in // 3)Authenticate the token for the first time
-  // Finir ligne 55
-
   generateSecret: async (req, res) => {
     try {
 
-        console.log(req.body);
       // recois une var "2fa" qui vaut soit true si l'utilisateur veut activer 2FA ou false si il veut la désactiver !
       // on vérifie que req.body est bien un booleén !
-      if (!validator.isBoolean(req.body.twofa)) {
-        const scores = await Score.findAll({
-          where: {
-            user_id: req.session.user.id,
-          },
-          order: ['quizz'],
-          include: {
-            association: 'quizzes'
-          }
-        });
+      if (req.body.twofa === undefined || !validator.isBoolean(req.body.twofa)) {
+
         return res.render('profile', {
-          error: 'Seules les valeurs "true ou "false" sont valable.',
-          scores,
+          error: 'Vous avez saisi une valeur incorrect dans le formulaire.',
+          scores: await scores(req, res),
           user: req.session.user,
-
         });
+      } else if (req.body.twofa === "false") {
+        req.body.twofa = false
+      } else if (req.body.twofa === "true") {
+        req.body.twofa = true
       };
-
-      const twofaFromUser = Boolean(req.body.twofa);
 
       //Je récupére les données de mon user qui s'est normalement au préalable identifié...
       const userInDb = await User.findByPk(req.session.user.id);
@@ -545,130 +529,59 @@ const userController = {
 
       // si "2fa" vaut false =
       // on vérifit l'état dans la db et si true on la passe a false, et on renvoie une vue au user !
+      const twofaFromUser = req.body.twofa;
 
       if (twofaFromUser === false) {
-
-        console.log("ligne 551, twofaFromUser === false ")
-
-
-        const scores = await Score.findAll({
-          where: {
-            user_id: req.session.user.id,
-          },
-          order: ['quizz'],
-          include: {
-            association: 'quizzes'
-          }
-        });
 
         //Si l'utilisateur l'a déja activé et veut la supprimer...
         if (userInDb.twofa === false) {
 
-          console.log("ligne 568, twofaFromUser === false userInDb.twofa === false ")
-
-
           return res.render('profile', {
             error: 'Votre authentification à deux facteurs est déja désactivée.',
-            scores,
+            scores: await scores(req, res),
             user: req.session.user,
+
           });
         } else if (userInDb.twofa === true) {
 
-          console.log("ligne 578, twofaFromUser === false userInDb.twofa === true ")
-
-
-          //J'update a false la valeur de la colonne 2FA 
+          //J'update a false la valeur de la colonne 2FA et je supprime le secret en bdd
           await User.update({
             twofa: false,
+            secret: null,
           }, {
             where: {
               id: req.session.user.id,
             }
           });
 
+          // j'update également la valeur en session
+          req.session.user.statutTwoFA = "Désactivée";
+
           return res.render('profile', {
-            error: 'Votre authentification à deux facteurs a bien été désactivée.',
-            scores,
+            error: 'Votre authentification à deux facteurs a bien été désactivée (vous pouvez également supprimer le compte "The Quiz" de votre application d\'authentification).',
+            scores: await scores(req, res),
             user: req.session.user,
           });
         }
 
       } else if (twofaFromUser === true) {
 
-        console.log("ligne 593, twofaFromUser === true ")
-
-
         if (userInDb.twofa === true) {
-
-          console.log("ligne 593, twofaFromUser === true userInDb.twofa === true ")
-
-
-          const scores = await Score.findAll({
-            where: {
-              user_id: req.session.user.id,
-            },
-            order: ['quizz'],
-            include: {
-              association: 'quizzes'
-            }
-          });
 
           return res.render('profile', {
             error: 'Votre authentification à deux facteurs a déja été activée !',
-            scores,
+            scores: await scores(req, res),
             user: req.session.user,
+
           });
         } else if (userInDb.twofa === false) {
 
-          console.log("ligne 593, twofaFromUser === true userInDb.twofa === false ")
-
-
-          //génération d'un secret via la méthode generateSecret de speakeasy
-          // secret non partagé, que je garde en bdd
-          const mysecret = await speakeasy.generateSecret({
-            name: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
-            length: 200, //par défault 32
-          });
-          //console.log('mysecret ====>> ', mysecret);
-
-          // Création d'un lien que l'on passera a notre qrcode
-          //par défault on a du SHA1 => aucune robustesse... => on passe en SHA512 ! Mais pas certain qu'il soit bien pris en compte... 
-          const secret = await speakeasy.otpauthURL({
-            secret: mysecret.base32,
-            label: process.env.TWO_FACTOR_AUTHENTICATION_APP_NAME,
-            algorithm: 'sha512',
-            encoding: 'base32'
-          });
-
-          req.session.user.two_factor_secret = mysecret.base32;
-          console.log("req.session.user.two_factor_secret ==>>> ", req.session.user.two_factor_secret);
-
-          let theQrcode;
-          try {
-
-            theQrcode = await toDataURL(secret, {
-              errorCorrectionLevel: 'H'
-            }, );
-
-            // un apercu du qrcode en console.
-            /*  console.log("Rhoo le beau Qrcode ==>> ", await toString(secret, {
-              type: 'terminal',
-            }, {
-              errorCorrectionLevel: 'H'
-            }));  */
-
-          } catch (err) {
-            console.error("Erreur lors de la création du QrCode ! ==>> ", err);
-            return res.status(500).end();
-          }
-
           //je renvoie ma vue avec mon nouveau qrcode intégrée via le chemin de l'image !
           return res.status(200).render("qrcode", {
-            theQrcode
+            theQrcode: await makeQrCode(req, res),
+            link: undefined,
           });
-
         }
-
       };
 
     } catch (error) {
@@ -682,62 +595,157 @@ const userController = {
 
       // je vérifit qu'il s'agit bien d'un nombre a 6 chiffres !
       console.log("req.body ===>> ", req.body);
+
       if (!validator.isNumeric(req.body.code) || req.body.code.length !== 6) {
 
         return res.render('qrcode', {
           error: 'Le format du code est incorrect !',
-          theQrcode: undefined
+          theQrcode: undefined,
+          link: true,
         });
       }
       const token = req.body.code;
-      console.log('req.session.user ===>>> ', req.session.user);
-      console.log('token ===>>> ', token);
-      console.log("req.session.user.two_factor_secret ===>> ", req.session.user.two_factor_secret);
 
       const isTokenValide = speakeasy.totp.verify({
         secret: req.session.user.two_factor_secret,
         encoding: 'base32',
         token,
-        //algorithm:'sha512'
+        //algorithm:'sha512' => plante si définit...
 
       });
-      console.log("isTokenValide ====>>> ", isTokenValide);
 
-      //FLAG 
-      //! que fait on quand le token est valide ! 
+      console.log("isTokenValide et notre authentification 2FA a le statut ====>>> ", isTokenValide);
 
-      // passer a true la valeur en bdd pour twofa, 
-      await User.update({
-        twofa: true,
-      }, {
-        where: {
-          id: req.session.user.id,
-        }
-      });
+      if (isTokenValide === true) {
 
-      // socker le secret du user
-      await User.update({
-        secret: req.session.user.two_factor_secret,
-      }, {
-        where: {
-          id: req.session.user.id,
-        }
-      });
+        // passer a true la valeur en bdd pour twofa, 
+        await User.update({
+          twofa: true,
+        }, {
+          where: {
+            id: req.session.user.id,
+          }
+        });
 
-      //Renvoyer une vue indiquant que tout c'est bien passé !
+        // socker le secret du user
+        await User.update({
+          secret: req.session.user.two_factor_secret,
+        }, {
+          where: {
+            id: req.session.user.id,
+          }
+        });
 
-      // etc..
+        //envoyer en session le statut de la 2FA
+        req.session.user.statutTwoFA = "Activée";
+        //je supprime la valeur du secret en session, maintenant qu'elle est en base !
+        req.session.user.two_factor_secret = undefined;
+
+
+        //Renvoyer une vue indiquant que tout c'est bien passé !
+        return res.status(200).render('profile', {
+          info: 'Votre authentification à deux facteurs a été activée avec succés  😃!',
+          scores: await scores(req, res),
+          user: req.session.user,
+
+        });
+
+      } else if (isTokenValide === false) {
+
+        //Renvoyer une vue indiquant le probléme !
+        return res.status(200).render('qrcode', {
+          error: 'Votre authentification à deux facteurs n\'a pas pu être activée. Vous pouvez essayer de ressaisir un code en provenance de votre application.',
+          theQrcode: undefined, // je ne veux pas réaficher le qrcode sinon le user doit supprimer de l'appli d'authentifiaction le compte "The Quiz" pour la ré-enregistrée..
+          link:true,
+
+        });
+      };
+
+
       // faire une feature pour choisir via email ou app d'authentification ?
-
       //https://levelup.gitconnected.com/3-easy-steps-to-implement-two-factor-authentication-in-node-js-559905530392
       //https://github.com/speakeasyjs/speakeasy/issues/95
       //https://www.npmjs.com/package/speakeasy#generateSecret 
 
-
-
     } catch (error) {
       console.log("Erreur dans la méthode validate du userController : ", error);
-      res.status(500).end();
+      return res.status(500).end();
+    }
+
+  },
+
+
+  validateSecretAfterLogin: async (req, res) => {
+    try {
+
+      // je vérifit qu'il s'agit bien d'un nombre a 6 chiffres !
+      if (!validator.isNumeric(req.body.code) || req.body.code.length !== 6) {
+
+        return res.render('login_step2', {
+          error: 'Le format du code est incorrect ! Vous pouvez essayer de ressaisir un code en provenance de votre application.',
+          link: true,
+
+        });
+      }
+      // je récupére les données de mon user via ce que j'ai passé en session avant la double authentification
+      const userInDb = await User.findByPk(req.session.theid);
+
+      // petite sécurité si jamais aucun user en BDD
+      if (!userInDb) { // ne devrait jamais exister car la page en cours nécéssite déja d'être connecté !
+
+        return res.render('login', {
+          error: 'Merci de vous connecter avant toute double authentification',
+        });
+      }
+
+      const isTokenValide = speakeasy.totp.verify({
+        secret: userInDb.secret,
+        encoding: 'base32',
+        token: req.body.code,
+        //algorithm:'sha512' => plante si définit...
+
+      });
+
+      console.log("Authentification 2FA avec le statut ====>>> ", isTokenValide);
+
+      if (isTokenValide === true) {        
+
+        // J'insére en session les infos nécéssaires
+        let twofaSession;
+        if (userInDb.twofa === true) {
+          twofaSession = "Activée";
+        } else if (userInDb.twofa === false) {
+          twofaSession = "Désactivée";
+        };
+        req.session.user = {
+          id: userInDb.id,
+          firstname: userInDb.firstname,
+          lastname: userInDb.lastname,
+          email: userInDb.email,
+          role: userInDb.role,
+          statutTwoFA: twofaSession,
+        };
+
+        //Fin de la procédure d'authentification, on renvoie le menu principal
+        return res.status(200).redirect('/');
+
+      } else if (isTokenValide === false) {
+
+        //Renvoyer une vue indiquant le probléme !
+        return res.status(200).render('login_step2', {
+          error: 'Votre authentification à deux facteurs n\'a pas pu être validée. Vous pouvez essayer de ressaisir un code en provenance de votre application.',
+          link: true,
+        });
+      };
+
+      // faire une feature pour choisir via email ou app d'authentification ?
+      //https://levelup.gitconnected.com/3-easy-steps-to-implement-two-factor-authentication-in-node-js-559905530392
+      //https://github.com/speakeasyjs/speakeasy/issues/95
+      //https://www.npmjs.com/package/speakeasy#generateSecret 
+
+    } catch (error) {
+      console.log("Erreur dans la méthode validateAfterLogin du userController : ", error);
+      return res.status(500).end();
     }
 
   },

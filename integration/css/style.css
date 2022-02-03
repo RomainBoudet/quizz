@@ -141,9 +141,20 @@
 
 .bandeau.error {
   color: red;
-  font-size: 2rem;
+  font-size: 1.5rem;
   animation: blinker 3s linear infinite;
 
+}
+
+.bandeau.info {
+  color: rgb(33, 170, 15);
+  font-size: 1.5rem;
+  animation: blinker 3s linear infinite;
+
+}
+
+.underline {
+  text-decoration: underline;
 }
 
 @keyframes blinker {
@@ -154,4 +165,25 @@
 
 .hide {
   display: none;
+}
+
+
+.form-signup.inline {
+  display: inline;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: rgb(122, 122, 131);
+  /*text-decoration: underline;*/
+  cursor: pointer;
+  font-size: 1em;
+  font-family: serif;
+}
+.link-button:focus {
+  outline: none;
+}
+.link-button:active {
+  color:red;
 }
