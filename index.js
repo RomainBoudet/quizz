@@ -50,7 +50,7 @@ const sessionOptions = {
 
 if (app.get('env') === 'production') { // Si la variable n'est pas spécifié dans le .env, Express retourne 'development' par défault !
   app.set('trust proxy', 1) // faire confiance au proxy nginx
-  sessionOptions.cookie.secure = true; // servir des cookies sécurisés sur https //! Pose probléme en prod...
+  sessionOptions.cookie.secure = false; // servir des cookies sécurisés sur https //! Pose probléme en prod...
 };
 
 //on lance les sessions aprés config
