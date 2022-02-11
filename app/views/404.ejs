@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">OUPS... vous avez l'air perdu.. un petit retour par la case <a href="https://quiz.romainboudet.fr">départ</a> peut être ?</h2>
+</div>
+
+<img src="/img/lost.jpg" alt="Are you lost ?!" class="rounded mx-auto d-block">
+
+<%# en cas d'erreur, on passera une variable error à notre vue %>
+<% if (locals.error) {%>
+<div class="bg-danger text-center font-weight-bold rounded" style="margin-top: 2rem; padding: 2rem; color: white;"><%= error %></div>
+<% } %>
+
+
+<%- include('partials/footer') %>

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const app = express();
-const path = require('path');
+const {connected} = require('./service/connected');
 
 const mainController = require('./controllers/mainController');
 const userController = require('./controllers/userController');
@@ -31,14 +30,14 @@ router.post('/signup', cleanPassword, userController.handleSignupForm);
 
 router.get('/disconnect', userController.logout);
 
-router.get('/profile', userController.profilePage);
+router.get('/profile', connected, userController.profilePage);
 
 //deconnexion
 router.get('/logout', userController.logout);
 
 //afficher les détails d'un quiz
 router.get('/quiz/:id(\\d+)', quizController.quizzPage);
-router.post('/quiz/:id(\\d+)', clean, quizController.quizzAnswer);
+router.post('/quiz/:id(\\d+)', connected, clean, quizController.quizzAnswer);
 
 //afficher tous les tags
 router.get('/tags', tagController.tagsPage);
@@ -56,9 +55,22 @@ router.post('/reset_pwd', cleanPassword, resetPassController.handleResetPwd); //
 
 // faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
 //! 2FA
-router.post('/profile', clean, twoFAController.generateSecret);
-router.post('/2fa/validate', clean, twoFAController.validateSecret);
-router.post('/2fa/validateAfterLogin', clean, twoFAController.validateSecretAfterLogin);
+router.post('/profile', connected, clean, twoFAController.generateSecret);
+router.post('/2fa/validate', connected, clean, twoFAController.validateSecret);
+router.post('/2fa/validateAfterLogin', connected, clean, twoFAController.validateSecretAfterLogin);
+
+//! 404
+router.get('/404', mainController.erreur);
+
+/**
+ * Redirection vers une page 404.
+ */
+ router.use((req, res) => {
+  //res.redirect(`https://localhost:4000/api-docs#/`);
+
+  res.status(404).redirect(`/404`);
+});
+
 
 //on exporte le routeur pour l'utiliser dans index.js
 module.exports = router;
