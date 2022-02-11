@@ -7,6 +7,10 @@ const mainController = require('./controllers/mainController');
 const userController = require('./controllers/userController');
 const quizController = require('./controllers/quizController');
 const tagController = require('./controllers/tagController');
+const twoFAController = require('./controllers/twoFAController');
+const resetPassController = require('./controllers/resetPassController');
+
+
 
 const {
     cleanPassword,
@@ -44,21 +48,17 @@ router.get('/tag/:id(\\d+)', tagController.quizzesByTag );
 
 //! RÉINITIALISATION DU MOT DE PASSE 
 // afficher le formulaire d'envoi d'un email ETAPE 1
-router.get('/reset_email', userController.resetEmail);// envoie le formulaire de l'email
-router.post('/reset_email',clean, userController.handleEmail); // envoie un email avec un lien
+router.get('/reset_email', resetPassController.resetEmail);// envoie le formulaire de l'email
+router.post('/reset_email',clean, resetPassController.handleEmail); // envoie un email avec un lien
 // Recoit le lien de l'email, vérifie la validité de la demande et enregistre le nouveau mot de passe ETAPE 2
-router.get('/reset_pwd', userController.resetPwd); // page de renvoit du lien qui recoit le token et l'user id en query et valide ainsi l'identité de l'utilisateur
-router.post('/reset_pwd', cleanPassword, userController.handleResetPwd); // traitement du nouveau password, enregistrement en BDD.
+router.get('/reset_pwd', resetPassController.resetPwd); // page de renvoit du lien qui recoit le token et l'user id en query et valide ainsi l'identité de l'utilisateur
+router.post('/reset_pwd', cleanPassword, resetPassController.handleResetPwd); // traitement du nouveau password, enregistrement en BDD.
 
-//! Mise en place d'une authentification a deux facteur via TOTP
-   //FLAG 
-   //TODO
 // faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
-router.post('/profile', userController.generateSecret);
-router.post('/2fa/validate', userController.validateSecret);
-router.post('/2fa/validateAfterLogin', userController.validateSecretAfterLogin);
-
-
+//! 2FA
+router.post('/profile', clean, twoFAController.generateSecret);
+router.post('/2fa/validate', clean, twoFAController.validateSecret);
+router.post('/2fa/validateAfterLogin', clean, twoFAController.validateSecretAfterLogin);
 
 //on exporte le routeur pour l'utiliser dans index.js
 module.exports = router;
