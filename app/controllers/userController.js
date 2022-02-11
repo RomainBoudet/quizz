@@ -81,7 +81,6 @@ const userController = {
           isByApp = true;
           isByMail = false;
         } else if (user.twofachoice === 2) {
-          console.log("on passe ! ligne 96");
           isByApp = false;
           isByMail = true;
         }

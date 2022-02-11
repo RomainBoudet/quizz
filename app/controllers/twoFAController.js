@@ -237,7 +237,7 @@ const twoFAController = {
             };
 
 
-            console.log("isTokenValide et notre authentification 2FA a le statut ====>>> ", isTokenValide);
+            //console.log("isTokenValide et notre authentification 2FA a le statut ====>>> ", isTokenValide);
 
             if (isTokenValide === true) {
 

@@ -53,11 +53,10 @@ router.post('/reset_email',clean, resetPassController.handleEmail); // envoie un
 router.get('/reset_pwd', resetPassController.resetPwd); // page de renvoit du lien qui recoit le token et l'user id en query et valide ainsi l'identité de l'utilisateur
 router.post('/reset_pwd', cleanPassword, resetPassController.handleResetPwd); // traitement du nouveau password, enregistrement en BDD.
 
-// faire un MW d'autorisation pour autoriser la route uniquement un user connecté !
 //! 2FA
 router.post('/profile', connected, clean, twoFAController.generateSecret);
 router.post('/2fa/validate', connected, clean, twoFAController.validateSecret);
-router.post('/2fa/validateAfterLogin', connected, clean, twoFAController.validateSecretAfterLogin);
+router.post('/2fa/validateAfterLogin', clean, twoFAController.validateSecretAfterLogin);
 
 //! 404
 router.get('/404', mainController.erreur);
