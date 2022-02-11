@@ -742,8 +742,8 @@ INSERT INTO "answer" ("id", "description", "question_id") VALUES
 --
 
 INSERT INTO "user" ("id", "firstname", "lastname", "email", "password") VALUES
-(1, 'Romain', 'Boudet', 'test@test.io', '$2b$10$fycu/TWO9yFn.biaj8ByfuemFV7THrMTj0tjPpLPzdChtySPpnUKq'),
-(2, 'Chuck', 'Norris', 'chuck@norris.io', '$2b$10$fycu/TWO9yFn.biaj8ByfuemFV7THrMTj0tjPpLPzdChtySPpnUKq');
+(1, 'Romain', 'Boudet', 'trash@r-boudet.fr', '$2b$10$fycu/TWO9yFn.biaj8ByfuemFV7THrMTj0tjPpLPzdChtySPpnUKq'),
+(2, 'Chuck', 'Norris', 'leo-boudet@hotmail.fr', '$2b$10$fycu/TWO9yFn.biaj8ByfuemFV7THrMTj0tjPpLPzdChtySPpnUKq');
 
 
 --

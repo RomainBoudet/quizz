@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Reset CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>The Quizz</title>
+</head>
+
+<body>
+    <a href="https://romainboudet.fr" target="_blank"><img
+            style=" position: absolute; z-index: 2000; top: 10px; left: 10px; border: 0; width: 100px; "
+            src="https://filedn.eu/lD5jpSv048KLfgLMlwC2cLz/RB.png" alt="logo RB"></a>
+
+
+    <header style="background-color: rgb(73, 43, 43);"
+        class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 text-white border-bottom shadow-sm">
+        <h1 class="h5 my-0 mr-md-auto font-weight-normal"></h1>
+        <nav id="navbar" class="navbar header navbar-inverse navbar-fixed-top align-items-center">
+            <a class="p-2 text-white" href="https://quiz.romainboudet.fr">Accueil</a>
+            <a class="p-2 text-white" href="https://quiz.romainboudet.fr/tags">Sujets</a>
+            <a class="p-2 text-white" href="https://quiz.romainboudet.fr/signup">S'inscrire</a>
+            <a class="p-2 text-white" href="https://quiz.romainboudet.fr/login">Se connecter</a>
+        </nav>
+    </header>
+    <main class="container">
+
+        <h3>Bonjour {{prenom}} {{nom}},</h3> <br>
+        <p>Vous souhaitez installer une authentification à deux facteurs sur le site The Quiz.</p> 
+        <br>
+        <p>Votre code : <strong>{{code}} </strong> </p>
+        <p>Ce code est valide jusqu'au {{tempsRestant}}. </p>
+        <p>Merci de renseigner ce code sur le site The Quiz pour finir la mise en place du processus d'authentification à deux facteurs. </p> 
+        <br>
+        <p>L'administrateur du site The Quiz.</p> <br>
+        <p>Bonne journée.</p> <br>
+
+    </main>
+    <footer class="pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
+            <div class="col-12 col-md text-center">
+                <small class="d-block mb-3 text-muted">Romain - Boudet © 2022</small>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
+
+{{!-- pour la syntaxe et les opérateur de conditions =>  https://www.npmjs.com/package/handlebars-helpers --}}

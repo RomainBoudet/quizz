@@ -1,0 +1,79 @@
+<%- include('partials/header') %>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h2 class="display-6">Activer l'authentification à deux facteurs sur The Quiz</h2>
+    <% if (isByApp) {%>
+    <p class="lead">Merci de scanner ce qrcode avec votre application 2FA favorite (Authy, Google Authenticator...etc)
+        et de renseigner le code fourni.</p>
+    <% } %>
+
+    <% if (isByMail) {%>
+    <p class="lead">Merci de renseigner le code fourni sur votre email.</p>
+    <% } %>
+
+</div>
+
+
+<div class="row">
+    <div class="col-6 offset-3">
+
+        <%# Si tout va bien, on passera une variable theQrCode à notre vue %>
+        <% if (theQrcode) {%>
+        <img src="<%= theQrcode %>" alt="Qrcode pour l'authentification à deux facteurs" class="qrcode"
+            crossorigin="anonymous">
+        <% } %>
+
+        <%# en cas d'erreur, on passera une variable error à notre vue %>
+        <% if (locals.error) {%>
+        <div class="bad"><%= error %></div>
+        <% } %>
+        <form action="/2fa/validate" method="POST" class="form-signup">
+
+            <div class="form-label-group">
+                <% if (isByMail) {%>
+                <input type="hidden" name="source" value="email">
+                <% } %>
+                <% if (isByApp) {%>
+                <input type="hidden" name="source" value="qrcode">
+                <% } %>
+                <input type="number" class="form-control" id="code" name="code"
+                    aria-describedby="TOTP code from your Authenticator app" placeholder="Votre code">
+                <label for="email">Votre code</label>
+                <small id="emailHelp" class="form-text text-muted">
+                    <% if (isByApp) {%>
+                    Votre code en provenance de votre application
+                    d'authentification
+                    <% } %>
+                    <% if (isByMail) {%>
+                    Votre code envoyé sur votre email pour activer l'authentification à deux facteurs
+                    <% } %>
+                </small>
+            </div>
+
+            <button class="btn btn-lg btn-success btn-block btn-success" type="submit">Valider</button>
+        </form>
+        <br>
+
+        <% if (isByApp) {%>
+        <form method="post" action="/profile" class=" form-signup inline">
+            <input type="hidden" name="twofa" value="1">
+            <button type="submit" class="link-button" data-toggle="tooltip" data-placement="left"
+                title="N'oubliez pas de supprimer le compte 'The Quiz' de votre application d'authentification si vous aviez déja scanné le qrcode précédent">
+                Scanner un nouveau qrcode ?
+            </button>
+        </form>
+        <% } %>
+
+        <% if (isByMail) {%>
+        <form method="post" action="/profile" class=" form-signup inline">
+            <input type="hidden" name="twofa" value="2">
+            <button type="submit" class="link-button" data-toggle="tooltip" data-placement="left"
+                title="Ce nouveau code sera valide 5 minutes">
+                Renvoyer un nouveau code par email ?
+            </button>
+        </form>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

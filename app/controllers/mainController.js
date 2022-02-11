@@ -12,7 +12,7 @@ const mainController = {
             })
             res.render('index', {quizzes});        
         } catch (error) {
-            console.trace(error)
+            console.trace("Erreur dans le mainController dans la méthode home =====> ",error)
             res.status(500).end();
         }
 
