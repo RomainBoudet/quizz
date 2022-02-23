@@ -20,7 +20,7 @@
 </div>
 
 <div class="row">
-    <div class="result">Vous avez marqué <%= nbPoints %> points. <span class="good">En vert les bonnes réponses</span>  et <span class="bad" >en rouge vos érreurs</span> : </div>
+    <div class="result">Vous avez marqué <%= nbPoints %> points. <span class="good">En vert les bonnes réponses</span>  et <span class="bad" >en rouge vos erreurs</span> : </div>
     <%# on boucle sur les questions avec for...in pour avoir accès à la position de la question dans le tableau
     grâce à cette position, on pourra consulter l'élément du tableau answers à la même position %>
     <% for(let indexQuest in quiz.questions) { %>
