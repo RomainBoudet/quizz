@@ -760,7 +760,7 @@ INSERT INTO "level" ("id", "name") VALUES
 --
 
 INSERT INTO "quiz" ("id", "title", "description", "user_id") VALUES
-(1, 'Animaux célèbres - I', 'Tantôt effrayants, tdropantôt drôles.', 1),
+(1, 'Animaux célèbres - I', 'Tantôt effrayants, Tantôt drôles.', 1),
 (2, 'Le chocolat - I', 'Bon pour le moral, un peu moins pour le foie.', 1),
 (3, 'Linux - I', 'Non, ce n''est pas un pingouin!', 1),
 (4, 'Star Wars - I', 'La légende continue.', 1),
