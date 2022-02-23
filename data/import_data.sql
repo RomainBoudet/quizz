@@ -764,8 +764,8 @@ INSERT INTO "quiz" ("id", "title", "description", "user_id") VALUES
 (2, 'Le chocolat - I', 'Bon pour le moral, un peu moins pour le foie.', 1),
 (3, 'Linux - I', 'Non, ce n''est pas un pingouin!', 1),
 (4, 'Star Wars - I', 'La légende continue.', 1),
-(5, 'Les bières belges - I', 'Patrimoine exporté dans le monde entier', 1),
-(6, 'Les fromages de France - I', 'Près de 1000 fromages différents', 1),
+(5, 'Bières belges - I', 'Patrimoine exporté dans le monde entier', 1),
+(6, 'Fromages de France - I', 'Près de 1000 fromages différents', 1),
 (7, 'Animaux célèbres - II', 'Tantôt effrayants, tantôt drôles.', 1),
 (8, 'Animaux célèbres - III', 'Tantôt effrayants, tantôt drôles.', 1),
 (9, 'Le chocolat - II', 'Bon pour le moral, un peu moins pour le foie.', 1),
@@ -774,10 +774,10 @@ INSERT INTO "quiz" ("id", "title", "description", "user_id") VALUES
 (12, 'Linux - III', 'Non, ce n''est pas un pingouin!', 1),
 (13, 'Star Wars - II', 'La légende continue.', 1),
 (14, 'Star Wars - III', 'La légende continue.', 1),
-(15, 'Les bières belges - II', 'Patrimoine exporté dans le monde entier', 1),
-(16, 'Les bières belges - III', 'Patrimoine exporté dans le monde entier', 1),
-(17, 'Les fromages de France - II', 'Près de 1000 fromages différents', 1),
-(18, 'Les fromages de France - III', 'Près de 1000 fromages différents', 1);
+(15, 'Bières belges - II', 'Patrimoine exporté dans le monde entier', 1),
+(16, 'Bières belges - III', 'Patrimoine exporté dans le monde entier', 1),
+(17, 'Fromages de France - II', 'Près de 1000 fromages différents', 1),
+(18, 'Fromages de France - III', 'Près de 1000 fromages différents', 1);
 
 
 --
@@ -832,7 +832,7 @@ INSERT INTO "question" ("id", "quiz_id", "question", "level_id", "anecdote", "wi
 (34, 2, 'Quel chocolat, parfois mélangé avec des épices, contient le moins de sucre ?', 1, 'La qualité du chocolat noir dépend des ingrédients utilisés, et de son pourcentage en cacao.', 'Chocolat_noir', 34),
 (35, 9, 'En 1825, quel Suisse a créé une désormais célèbre fabrique de chocolat ?', 1, 'Philippe Suchard débuta dans la confiserie en 1825 à Neuchâtel et se lanca dans le chocolat à Serrières en 1826.', 'Philippe_Suchard', 35),
 (36, 10, 'Que provoque la consommation de chocolat chez la plupart des animaux de compagnie ?', 1, 'Le chocolat contient de la théobromine, un produit semblable à la caféine que leur métabolisme ne permet pas d''éliminer.', 'Chocolat', 36),
-(37, 2, 'Quel chocolat, riche en acides gras saturés, est le plus amère ?', 1, 'Le chocolat noir, qui contient peu de cholesterol et très peu de sodium, est une bonne source de magnésium.', 'Chocolat_noir', 37),
+(37, 2, 'Quel chocolat, riche en acides gras saturés, est le plus amer ?', 1, 'Le chocolat noir, qui contient peu de cholesterol et très peu de sodium, est une bonne source de magnésium.', 'Chocolat_noir', 37),
 (38, 9, 'Qui incarne la chocolatière dans le film adapté du roman Le chocolat de Joanne Harris ? ', 1, 'En 1959, durant le carême, une jeune femme et sa fille reprennent la vieille pâtisserie pour ouvrir une chocolaterie.', 'Le_Chocolat', 38),
 (39, 10, 'Comment appelle-t-on le fruit du cacaoyer, se présentant sous la forme d''une baie ?', 1, 'Les cabosses se trouvent sur le tronc et les grosses branches, et non pas sur les rameaux jeunes.', 'Cabosse', 39),
 (40, 2, 'Quel chocolat, généralement préféré par les puristes, ne contient pas de lait ?', 1, 'Réglementairement, le chocolat noir doit contenir au moins 35 % de cacao, sans limite supérieure pour la concentration de cacao.', 'Chocolat_noir', 40),
