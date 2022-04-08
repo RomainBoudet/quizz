@@ -56,7 +56,7 @@ if (app.get('env') === 'production') { // Si la variable n'est pas spécifié da
 //on lance les sessions aprés config
 app.use(session(sessionOptions));
 
-app.use(helmet());
+//app.use(helmet()); //! Géré par NGINX désormais...
 
 
 // Config for sub-resources integrity 
@@ -79,18 +79,6 @@ app.use(helmet.contentSecurityPolicy({
       upgradeInsecureRequests: [] 
     }
   }));
-
-// quelques configuration de headers...
-app.use((req, res, next) => {
-    res.setHeader(
-      "Permissions-Policy",
-      "geolocation=(), fullscreen=(), autoplay=(), camera=(), display-capture=(), document-domain=(), fullscreen=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), sync-xhr=(), usb=(), screen-wake-lock=(), xr-spatial-tracking=()"
-    );
-      res.setHeader("X-XSS-Protection", "1; mode=block");
-      next();
-    });
-  
-  app.set('x-powered-by', false);
 
   //on veut utiliser notre middleware maison pour initialiser user en session à chaque requête
 app.use(userMW);
